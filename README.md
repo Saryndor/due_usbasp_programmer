@@ -1,8 +1,22 @@
 # Arduino Due USBasp Programmer
 
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Platform](https://img.shields.io/badge/platform-Arduino_Due-teal.svg)
+![Protocol](https://img.shields.io/badge/protocol-USBasp-orange.svg)
+
+## Table of Contents
+- [Features](#features)
+- [Hardware Setup](#hardware-setup)
+- [Building the Project](#building-the-project)
+- [AVRDUDE Usage](#avrdude)
+
+---
+
 A high-speed, native USB ISP programmer implementation for the Arduino Due (SAM3X8E), emulating the popular **USBasp** protocol.
 
 This project turns an Arduino Due into a robust AVR In-System Programmer (ISP) capable of flashing generic AVR microcontrollers (ATtiny, ATmega) using `avrdude`.
+
+---
 
 ## Features
 
@@ -18,9 +32,11 @@ This project turns an Arduino Due into a robust AVR In-System Programmer (ISP) c
 
 ## Hardware Setup
 
-**Important:** Since the Arduino Due operates at **3.3V** and most AVR targets operate at **5V**, a level shifting circuit is **required**.
+> **Important:** Since the Arduino Due operates at **3.3V** and most AVR targets operate at **5V**, a level shifting circuit is **required**.
 
-> **Detailed Schematic:** Please refer to the PDF file located in the `doc/` folder. It contains the complete KiCad schematic with all relevant technical details.
+### Wiring Diagram
+
+![Arduino Due USBasp Wiring Diagram and Circuit Schematic](images/due_usbasp_programmer.png)
 
 ### Pin Mapping (Arduino Due SPI Header)
 
@@ -63,10 +79,34 @@ a **BAT85 Schottky Diode** configuration protects the Due's MISO input:
 ### Compilation
 
 1. Clone the repository.
-2. Change directory `cd due_usbasp_programmer`
-3. Run `mkdir build && cmake -S . -B build -G Ninja` in the project directory.
-4. Build `cmake --build build`
-5. Clean `rm -rf build/* && cmake -S . -B build -G Ninja`
+
+```bash
+git clone https://github.com/Saryndor/due_usbasp_programmer.git
+```
+
+2. Change directory
+
+```bash
+cd due_usbasp_programmer
+```
+
+3. Create build folder
+
+```bash
+mkdir build && cmake -S . -B build -G Ninja
+```
+
+4. Build
+
+```bash
+cmake --build build
+```
+
+5. Clean
+
+```bash
+rm -rf build/* && cmake -S . -B build -G Ninja
+```
 
 ### AVRDUDE
 
@@ -181,4 +221,4 @@ Avrdude done.  Thank you.
 
 ## License
 
-[MIT](https://www.google.com/search?q=LICENSE)
+[MIT](LICENSE)
