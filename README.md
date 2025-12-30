@@ -5,6 +5,7 @@
 ![Protocol](https://img.shields.io/badge/protocol-USBasp-orange.svg)
 
 ## Table of Contents
+
 - [Features](#features)
 - [Hardware Setup](#hardware-setup)
 - [Building the Project](#building-the-project)
@@ -20,15 +21,15 @@ This project turns an Arduino Due into a robust AVR In-System Programmer (ISP) c
 
 ## Features
 
-* **Native USB High-Speed:** Uses the SAM3X8E native USB peripheral (no USB-to-Serial converter latency).
-* **Hybrid SPI Engine:**
-  * **Hardware SPI:** For high-speed programming (up to 3 MHz).
-  * **Software SPI:** Automatic fallback for low-speed targets (down to < 1 kHz) or rescue clocking.
-* **Smart Timing:** Implements logic based on Microchip/Atmel ATDF specifications for robust timing and stability.
-* **Smart Target Isolation:** Automatically disables the level shifter outputs (High-Impedance) when the programmer is idle. This allows the programmer to **remain permanently connected** to the target circuit without interfering with its normal operation.
-* **Integrated CDC Serial Bridge:** Provides a virtual serial port (USB CDC) to communicate with the target's UART (e.g., debug output) without needing an extra USB-TTL adapter.
-* **Extended Protocol:** Supports extended addressing for large Flash (>128kB) and robust page-writing logic.
-* **Double Buffered USB:** Efficient endpoint handling to maximize throughput.
+- **Native USB High-Speed:** Uses the SAM3X8E native USB peripheral (no USB-to-Serial converter latency).
+- **Hybrid SPI Engine:**
+  - **Hardware SPI:** For high-speed programming (up to 3 MHz).
+  - **Software SPI:** Automatic fallback for low-speed targets (down to < 1 kHz) or rescue clocking.
+- **Smart Timing:** Implements logic based on Microchip/Atmel ATDF specifications for robust timing and stability.
+- **Smart Target Isolation:** Automatically disables the level shifter outputs (High-Impedance) when the programmer is idle. This allows the programmer to **remain permanently connected** to the target circuit without interfering with its normal operation.
+- **Integrated CDC Serial Bridge:** Provides a virtual serial port (USB CDC) to communicate with the target's UART (e.g., debug output) without needing an extra USB-TTL adapter.
+- **Extended Protocol:** Supports extended addressing for large Flash (>128kB) and robust page-writing logic.
+- **Double Buffered USB:** Efficient endpoint handling to maximize throughput.
 
 ## Hardware Setup
 
@@ -44,8 +45,8 @@ This project turns an Arduino Due into a robust AVR In-System Programmer (ISP) c
 | :--- | :--- | :--- |
 | **MOSI** | SPI Header (MOSI) | Master Out Slave In |
 | **MISO** | SPI Header (MISO) | Master In Slave Out |
-| **SCK** | SPI Header (SCK)  | Serial Clock |
-| **RST** | D55/A1 (or custom)   | Target Reset Control |
+| **SCK** | SPI Header (SCK) | Serial Clock |
+| **RST** | D55/A1 (or custom) | Target Reset Control |
 | **GND** | GND | Ground |
 | **VCC** | 5V / 3.3V | Target Power |
 
@@ -56,14 +57,14 @@ To achieve stable communication at 3 MHz, the following protection and impedance
 **1. Level Shifting & Isolation (3.3V Logic -> 5V Target)**
 an **SN74HCT245** transceiver is used for signals going TO the target (MOSI, SCK, RST).
 
-* **Boosting:** It boosts the Due's 3.3V signals to clean 5V TTL levels compatible with AVRs.
-* **Isolation:** The firmware controls the **Output Enable (OE)** pin of the HCT245. When idle, the outputs are switched to high-impedance (tri-state), electrically disconnecting the programmer lines from the target.
+- **Boosting:** It boosts the Due's 3.3V signals to clean 5V TTL levels compatible with AVRs.
+- **Isolation:** The firmware controls the **Output Enable (OE)** pin of the HCT245. When idle, the outputs are switched to high-impedance (tri-state), electrically disconnecting the programmer lines from the target.
 
 **2. Protection (5V Target -> 3.3V Logic)**
 a **BAT85 Schottky Diode** configuration protects the Due's MISO input:
 
-* **Diode:** Anode to Due MISO, Cathode to Target MISO.
-* **Pull-Up:** A strong **500Ω Pull-Up resistor** connects Due MISO to 3.3V.
+- **Diode:** Anode to Due MISO, Cathode to Target MISO.
+- **Pull-Up:** A strong **500Ω Pull-Up resistor** connects Due MISO to 3.3V.
 
 **3. Impedance Matching**
 **100Ω series resistors** are placed on SCK, MOSI, and RST lines to dampen reflections (ringing) on the cable.
@@ -72,40 +73,66 @@ a **BAT85 Schottky Diode** configuration protects the Due's MISO input:
 
 ### Requirements
 
-* **Toolchain:** `arm-none-eabi-gcc`
-* **Utilities:** `cmake`, `ninja`
-* **Flasher:** `bossac` or `Black Magic Probe`(for uploading to Due)
+- **Toolchain:** `arm-none-eabi-gcc`
+- **Utilities:** `cmake`, `ninja`
+- **Flasher:** `bossac` or `Black Magic Probe`(for uploading to Due)
 
 ### Compilation
 
-1. Clone the repository.
+Clone the repository.
 
 ```bash
 git clone https://github.com/Saryndor/due_usbasp_programmer.git
 ```
 
-2. Change directory
+Change directory
 
 ```bash
 cd due_usbasp_programmer
 ```
 
-3. Create build folder
+Create build folder
 
 ```bash
 mkdir build && cmake -S . -B build -G Ninja
 ```
 
-4. Build
+Build
 
 ```bash
 cmake --build build
 ```
 
-5. Clean
+Clean
 
 ```bash
 rm -rf build/* && cmake -S . -B build -G Ninja
+```
+
+### FIRMWARE
+
+- [due_usbasp_programmer.bin](firmware/due_usbasp_programmer.bin)
+- [due_usbasp_programmer.elf](firmware/due_usbasp_programmer.elf)
+
+Flash firmware with `bossac`
+
+```bash
+bossac -e -w -v -p /dev/ttyACM0 -b ./build/due_usbasp_programmer.bin
+```
+
+Flash with `Black Magic Debug/Probe`
+
+```bash
+gdb-multiarch \
+	-nx \
+	--batch \
+	-ex target extended-remote /dev/ttyACM0 \
+	-ex monitor swdp_scan \
+	-ex att 1 \
+	-ex load \
+	-ex compare-sections \
+	-ex kill \
+  due_usbasp_programmer.elf
 ```
 
 ### AVRDUDE
